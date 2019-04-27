@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Lamar;
+using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace wpfioclamar
@@ -8,25 +9,25 @@ namespace wpfioclamar
     /// </summary>
     public partial class App
     {
-        private readonly ServiceProvider _serviceProvider;
+        private Container _container;
 
         public App()
         {
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
+            var services = new ServiceRegistry();
 
-            _serviceProvider = serviceCollection.BuildServiceProvider();
+            ConfigureServices(services);
+
+            _container = new Container(services);
         }
 
-        private void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(ServiceRegistry services)
         {
-            services.AddSingleton<ITextService>(provider => new TextService("Hello WPF .NET Core 3.0!"));
-            services.AddSingleton<MainWindow>();
+            services.For<ITextService>().Use(new TextService("Hello WPF .NET Core 3.0!"));
         }
-        
+
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            var mainWindow = _serviceProvider.GetService<MainWindow>();
+            var mainWindow = _container.GetInstance<MainWindow>();
             mainWindow.Show();
         }
     }
